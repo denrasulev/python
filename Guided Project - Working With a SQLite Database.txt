@@ -1,0 +1,58 @@
+# query.py
+
+import sqlite3
+conn = sqlite3.connect('factbook.db')
+
+c = conn.cursor()
+c.execute('SELECT * FROM facts ORDER BY population ASC LIMIT 10;')
+print(c.fetchall())
+
+conn.close()
+
+
+# growth.py
+
+import math
+import sqlite3
+import pandas as pd
+
+conn  = sqlite3.connect('factbook.db')
+facts = pd.read_sql_query('SELECT * FROM facts;', conn)
+facts = facts.dropna(axis=0, subset=['area_land', 'population', 'population_growth'])
+
+def estimate_pop(row, y):
+    pop   = row['population']
+    pop_g = row['population_growth']
+    return int(pop * (math.e ** ((pop_g/100) * y)))
+
+facts['population_2050'] = facts.apply(lambda row: estimate_pop(row, 35), axis=1)
+facts = facts.sort(columns='population_2050', ascending=False)
+
+print(facts[['name', 'population_2050']].head(10))
+conn.close()
+
+
+# area.py
+
+import sqlite3
+import pandas as pd
+
+conn = sqlite3.connect('factbook.db')
+
+sum_land = pd.read_sql_query('select sum(area_land) from facts;', conn)['sum(area_land)'][0]
+print(sum_land)
+sum_water = pd.read_sql_query('select sum(area_water) from facts;', conn)['sum(area_water)'][0]
+
+print(sum_water)
+print(sum_land / sum_water)
+
+conn.close()
+
+'''
+Here are a few interesting questions to get you started:
+
+Which countries will lose population over the next 35 years?
+Which countries have the lowest and highest population densities?
+Which countries receive the most immigrants? Which countries lose the most emigrants?
+'''
+
