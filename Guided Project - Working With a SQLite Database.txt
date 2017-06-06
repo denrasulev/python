@@ -56,3 +56,10 @@ Which countries have the lowest and highest population densities?
 Which countries receive the most immigrants? Which countries lose the most emigrants?
 '''
 
+# print values counts and values per column of dataframe
+for i in range(5,11):
+    x = ' '.join(["Unnamed:", str(i)])
+    p = academy_awards[x].value_counts()
+    df2 = pd.DataFrame({'value':p.index, 'count':p.values})
+    print (x, '\n', df2.to_string(index=False), '\n')
+
